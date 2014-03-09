@@ -12,6 +12,8 @@ public class MainActivity extends AndroidApplication {
         
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         
+        cfg.useAccelerometer = true;
+        
         initialize(new Pong(), cfg);
     }
 }
