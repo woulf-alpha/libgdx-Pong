@@ -76,20 +76,20 @@ public class Pong implements ApplicationListener {
 		
 		if (leftPlayerPointer >= 0) {
 			if (h - Gdx.input.getY(leftPlayerPointer) >= leftPaddle.getY() + leftPaddle.getHeight()/2.f) {
-				if (leftPaddle.getY() + leftPaddle.getHeight() <= h - 8) {
+				if (leftPaddle.getY() <= h - 8) {
 					leftPaddle.setY(leftPaddle.getY() + 7);
 				}
-			} else if (leftPaddle.getY() >= 8) {
+			} else if (leftPaddle.getY() >= 8){
 				leftPaddle.setY(leftPaddle.getY() - 7);
 			}
 		}
 		
 		if (rightPlayerPointer >= 0) {
 			if (h - Gdx.input.getY(rightPlayerPointer) >= rightPaddle.getY() + rightPaddle.getHeight()/2.f) {
-				if (rightPaddle.getY() +rightPaddle.getHeight() <= h - 8) {
+				if (rightPaddle.getY() <= h - 8) {
 					rightPaddle.setY(rightPaddle.getY() + 7);
 				}
-			} else if (rightPaddle.getY() >= 8) {
+			} else if (rightPaddle.getY() >= 8){
 				rightPaddle.setY(rightPaddle.getY() - 7);
 			}
 		}
