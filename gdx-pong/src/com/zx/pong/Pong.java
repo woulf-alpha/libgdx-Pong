@@ -26,6 +26,8 @@ public class Pong implements ApplicationListener {
 	private Sprite ball;
 	
 	private boolean ballMovingLeft;
+	private float ballYMovement;
+	private float ballSpeed;
 	
 	private ShapeRenderer shapeRenderer;
 	
@@ -58,6 +60,8 @@ public class Pong implements ApplicationListener {
 		ball.setPosition(w/2.f + ball.getWidth()/2.f, h/2.f + ball.getHeight()/2.f);
 		
 		ballMovingLeft = true;
+		ballSpeed = 10;
+		ballYMovement = 0;
 	}
 		
 	@Override
@@ -75,22 +79,39 @@ public class Pong implements ApplicationListener {
 		Rectangle rightPaddleRect = new Rectangle(rightPaddle.getX(), rightPaddle.getY(), rightPaddle.getWidth(), rightPaddle.getHeight());
 		Rectangle ballRect = new Rectangle(ball.getX(), ball.getY(), ball.getWidth(), ball.getHeight());
 		
+		//Collision Check
+		//Issue: Ball can enter paddle
 		if (ballRect.overlaps(leftPaddleRect) || ballRect.overlaps(rightPaddleRect)) {
 			ballMovingLeft = !ballMovingLeft;
+			ballYMovement = (float) ((Math.random()-0.5f) * 20.f);
+			ballSpeed += 1;
 		}
 		
+		//Move ball along x-axis
 		if (ballMovingLeft) {
-			ball.setX(ball.getX() - 10);
+			ball.setX(ball.getX() - ballSpeed);
 		} else {
-			ball.setX(ball.getX() + 10);
+			ball.setX(ball.getX() + ballSpeed);
 		}
 		
+		//Reset ball if off the left/right of the screen
 		if (ball.getX() + ball.getWidth() <= 0 || ball.getX() >= w) {
 			ball.setX(w/2.f + ball.getWidth()/2.f);
 			ball.setY(h/2.f + ball.getHeight()/2.f);
 			ballMovingLeft = !ballMovingLeft;
+			ballYMovement = (float) ((Math.random()-0.5f) * 20.f);
 		}
 		
+		//Inverse Y-Movement if going off the top/bottom of the screen
+		if (ball.getY() <= 0 || ball.getY() + ball.getHeight() >= h) {
+			ballYMovement = -ballYMovement;
+			ballSpeed = 10;
+		}
+		
+		//Move ball along y-axis
+		ball.setY(ball.getY() + ballYMovement);
+		
+		//Set player pointer depending on where the first finger is
 		if (Gdx.input.isTouched(0)) {
 			if (Gdx.input.getX(0) >= w/2.f) {
 				rightPlayerPointer = 0;
@@ -100,6 +121,7 @@ public class Pong implements ApplicationListener {
 			}
 		}
 		
+		//Set player pointer depending on where second finger is
 		if (Gdx.input.isTouched(1)) {
 			if (Gdx.input.getX(1) >= w/2.f && rightPlayerPointer == -1) {
 				rightPlayerPointer = 1;
@@ -109,6 +131,7 @@ public class Pong implements ApplicationListener {
 			}
 		}
 		
+		//Detect pointer on respective side and move paddle according to finger position relative to middle of paddle
 		if (leftPlayerPointer >= 0) {
 			if (h - Gdx.input.getY(leftPlayerPointer) >= leftPaddle.getY() + leftPaddle.getHeight()/2.f) {
 				if (leftPaddle.getY() + leftPaddle.getHeight() <= h - 8) {
@@ -119,6 +142,7 @@ public class Pong implements ApplicationListener {
 			}
 		}
 		
+		//Detect pointer on respective side and move paddle according to finger position relative to middle of paddle
 		if (rightPlayerPointer >= 0) {
 			if (h - Gdx.input.getY(rightPlayerPointer) >= rightPaddle.getY() + rightPaddle.getHeight()/2.f) {
 				if (rightPaddle.getY() +rightPaddle.getHeight() <= h - 8) {
@@ -136,8 +160,9 @@ public class Pong implements ApplicationListener {
 				255.f / 255.f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
+		//Draw Line Separator
 		shapeRenderer.begin(ShapeType.Line);
-		shapeRenderer.setColor(100.f / 255.f, 100.f / 255.f, 100.f / 255.f, 1);
+		shapeRenderer.setColor(100.f / 255.f, 100.f / 255.f, 100.f / 255.f, 255.f / 255.f);
 		shapeRenderer.line(w/2.f, 0, w/2.f, h);
 		shapeRenderer.end();
 		
