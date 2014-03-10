@@ -5,11 +5,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 
 public class Pong implements ApplicationListener {
 	private float w;
@@ -17,6 +22,8 @@ public class Pong implements ApplicationListener {
 	
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
+	private SpriteBatch batchLeftPlayerScore;
+	private SpriteBatch batchRightPlayerScore;
 	
 	private Texture paddleTexture;
 	private Texture ballTexture;
@@ -29,7 +36,12 @@ public class Pong implements ApplicationListener {
 	private float ballYMovement;
 	private float ballSpeed;
 	
+	private int leftPlayerScore;
+	private int rightPlayerScore;
+	
 	private ShapeRenderer shapeRenderer;
+	
+	BitmapFont arial30;
 	
 	@Override
 	public void create() {	
@@ -38,7 +50,21 @@ public class Pong implements ApplicationListener {
 		
 		camera = new OrthographicCamera(w, h);
 		camera.setToOrtho(false, w, h);
+		
 		batch = new SpriteBatch();
+
+		Matrix4 rotMatLeft = new Matrix4();
+		Matrix4 rotMatRight = new Matrix4();
+		
+		batchLeftPlayerScore = new SpriteBatch();
+		//rotMat.setToRotation(new Vector3(w/4.f, h/2.f, 0), 180);
+		//rotMatLeft.setToRotation(new Vector3(90, 90, 0), 180);
+		batchLeftPlayerScore.setTransformMatrix(rotMatLeft);
+		
+		batchRightPlayerScore = new SpriteBatch();
+		//rotMatRight.setToRotation(new Vector3(1700, 700, 0), 180);
+		batchRightPlayerScore.setTransformMatrix(rotMatRight);
+		
 		shapeRenderer = new ShapeRenderer();
 		
 		paddleTexture = new Texture(Gdx.files.internal("square.png"));
@@ -62,6 +88,15 @@ public class Pong implements ApplicationListener {
 		ballMovingLeft = true;
 		ballSpeed = 10;
 		ballYMovement = 0;
+		
+		leftPlayerScore = 0;
+		rightPlayerScore = 0;
+		
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/arial.ttf"));
+		FreeTypeFontParameter fontParam = new FreeTypeFontParameter();
+		fontParam.size = 30;
+		fontParam.flip = false;
+		arial30 = generator.generateFont(fontParam);
 	}
 		
 	@Override
@@ -95,11 +130,20 @@ public class Pong implements ApplicationListener {
 		}
 		
 		//Reset ball if off the left/right of the screen
-		if (ball.getX() + ball.getWidth() <= 0 || ball.getX() >= w) {
+		if (ball.getX() + ball.getWidth() <= 0) {
 			ball.setX(w/2.f + ball.getWidth()/2.f);
 			ball.setY(h/2.f + ball.getHeight()/2.f);
 			ballMovingLeft = !ballMovingLeft;
 			ballYMovement = (float) ((Math.random()-0.5f) * 20.f);
+			
+			rightPlayerScore += 1;
+		} else if (ball.getX() >= w) {
+			ball.setX(w/2.f + ball.getWidth()/2.f);
+			ball.setY(h/2.f + ball.getHeight()/2.f);
+			ballMovingLeft = !ballMovingLeft;
+			ballYMovement = (float) ((Math.random()-0.5f) * 20.f);
+			
+			leftPlayerScore += 1;
 		}
 		
 		//Inverse Y-Movement if going off the top/bottom of the screen
@@ -172,6 +216,14 @@ public class Pong implements ApplicationListener {
 		leftPaddle.draw(batch);
 		rightPaddle.draw(batch);
 		batch.end();
+		
+		batchLeftPlayerScore.begin();
+		arial30.draw(batchLeftPlayerScore, String.valueOf(leftPlayerScore), w/4.f, h/2.f);
+		batchLeftPlayerScore.end();
+		
+		batchRightPlayerScore.begin();
+		arial30.draw(batchRightPlayerScore, String.valueOf(rightPlayerScore), w/2.f + w/4.f, h/2.f);
+		batchRightPlayerScore.end();
 	}
 		
 	@Override
